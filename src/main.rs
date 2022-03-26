@@ -1,11 +1,10 @@
 use actix_web::{get, web, App, HttpResponse, HttpServer, Responder};
-use config::{Config, ConfigError, File, Environment};
+use config::{Config, ConfigError, Environment, File};
 use handlebars::Handlebars;
 use scraper::{Html, Selector};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use std::env;
-
 
 #[derive(Debug, Deserialize)]
 struct Settings {
@@ -70,11 +69,10 @@ async fn main() -> std::io::Result<()> {
     let config = Settings::new().unwrap();
     let config_ref = web::Data::new(config);
 
-        let port = env::var("PORT")
+    let port = env::var("PORT")
         .unwrap_or_else(|_| "8080".to_string())
         .parse()
         .expect("PORT must be a number");
-
 
     HttpServer::new(move || {
         App::new()
