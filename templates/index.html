@@ -1,3 +1,26 @@
-<h1>template is being rendered</h1>
-<h2>{{ url }}</h2>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>scraped page</title>
+<style>
+body {
+  max-width: 700px;
+  margin: auto;
+  font-size: 18px;
+}
+
+p {
+  text-align: justify;
+  line-height: 1.1;
+}
+</style>
+</head>
+<body>
+<div class="scrape-info">
+  Scraped from the original: <a href="{{ url }}">{{ url }}</a>
+</div>
 {{{ main }}}
+</body>
+</html>

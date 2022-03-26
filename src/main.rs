@@ -3,7 +3,7 @@ use config::{Config, ConfigError, File};
 use handlebars::Handlebars;
 use reqwest;
 use scraper::{Html, Selector};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_json::json;
 
 #[derive(Debug, Deserialize)]
@@ -21,16 +21,26 @@ impl Settings {
     }
 }
 
-async fn scrape_page_for_main(url: &str) -> Result<String, Box<dyn std::error::Error>> {
-    let resp = reqwest::get(url).await?.text().await?;
-    let parsed_html = Html::parse_document(&resp);
+#[derive(Serialize)]
+struct ScrapeInfo {
+    main: String,
+    url: String,
+}
+
+async fn scrape_page_for_main(url: &str) -> Result<ScrapeInfo, Box<dyn std::error::Error>> {
+    let text = reqwest::get(url).await?.text().await?;
+    let parsed_html = Html::parse_document(&text);
     let selector = &Selector::parse("main").unwrap();
     let main_el = parsed_html
         .select(selector)
         .next()
         .map(|el| el.html())
         .unwrap_or(String::from("<div>something went wrong</div>"));
-    Ok(main_el)
+
+    Ok(ScrapeInfo {
+        main: main_el,
+        url: String::from(url),
+    })
 }
 
 #[get("/{path:.*}")]
@@ -40,12 +50,8 @@ async fn get_handler(
     path: web::Path<String>,
 ) -> impl Responder {
     let url = config.base_url.clone() + path.as_str();
-    let main_html = scrape_page_for_main(&url).await.unwrap();
-    let data = json!({
-        "url": config.base_url.clone() + path.as_str(),
-        "main": main_html
-    });
-
+    let scrape_info = scrape_page_for_main(&url).await.unwrap();
+    let data = json!(scrape_info);
     let body = hb.render("index", &data).unwrap();
     HttpResponse::Ok().body(body)
 }
