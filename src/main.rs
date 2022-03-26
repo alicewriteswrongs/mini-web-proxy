@@ -1,7 +1,6 @@
 use actix_web::{get, web, App, HttpResponse, HttpServer, Responder};
 use config::{Config, ConfigError, File};
 use handlebars::Handlebars;
-use reqwest;
 use scraper::{Html, Selector};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
@@ -36,7 +35,7 @@ async fn scrape_page_for_main(url: &str) -> Result<ScrapeInfo, Box<dyn std::erro
         .next()
         .map(|el| el.html())
         .map(|html| ammonia::clean(&html))
-        .unwrap_or(String::from("<div>something went wrong</div>"));
+        .unwrap_or_else(|| String::from("<div>something went wrong</div>"));
 
     Ok(ScrapeInfo {
         main: main_el,
