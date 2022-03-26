@@ -35,6 +35,7 @@ async fn scrape_page_for_main(url: &str) -> Result<ScrapeInfo, Box<dyn std::erro
         .select(selector)
         .next()
         .map(|el| el.html())
+        .map(|html| ammonia::clean(&html))
         .unwrap_or(String::from("<div>something went wrong</div>"));
 
     Ok(ScrapeInfo {
