@@ -8,14 +8,14 @@ use std::env;
 
 #[derive(Debug, Deserialize)]
 struct Settings {
-    base_url: String,
+    BASE_URL: String,
 }
 
 impl Settings {
     pub fn new() -> Result<Self, ConfigError> {
         let s = Config::builder()
-            .add_source(File::with_name("Config.toml"))
-            .add_source(Environment::with_prefix("base_url"))
+            .add_source(File::with_name("Config.toml").required(false))
+            .add_source(Environment::with_prefix("PROXY"))
             .build()?;
 
         s.try_deserialize()
@@ -51,7 +51,7 @@ async fn get_handler(
     config: web::Data<Settings>,
     path: web::Path<String>,
 ) -> impl Responder {
-    let url = config.base_url.clone() + path.as_str();
+    let url = config.BASE_URL.clone() + path.as_str();
     let scrape_info = scrape_page_for_main(&url).await.unwrap();
     let data = json!(scrape_info);
     let body = hb.render("index", &data).unwrap();
