@@ -9,5 +9,5 @@ You can set a `$BASE_URL` environment variable to the url which you wish to
 proxy access to, like so (for development):
 
 ```sh
-BASE_URL="https://example.com cargo run
+BASE_URL="https://example.com" cargo run
 ```
