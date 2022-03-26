@@ -1,9 +1,11 @@
 use actix_web::{get, web, App, HttpResponse, HttpServer, Responder};
-use config::{Config, ConfigError, File};
+use config::{Config, ConfigError, File, Environment};
 use handlebars::Handlebars;
 use scraper::{Html, Selector};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
+use std::env;
+
 
 #[derive(Debug, Deserialize)]
 struct Settings {
@@ -14,6 +16,7 @@ impl Settings {
     pub fn new() -> Result<Self, ConfigError> {
         let s = Config::builder()
             .add_source(File::with_name("Config.toml"))
+            .add_source(Environment::with_prefix("base_url"))
             .build()?;
 
         s.try_deserialize()
@@ -67,13 +70,19 @@ async fn main() -> std::io::Result<()> {
     let config = Settings::new().unwrap();
     let config_ref = web::Data::new(config);
 
+        let port = env::var("PORT")
+        .unwrap_or_else(|_| "8080".to_string())
+        .parse()
+        .expect("PORT must be a number");
+
+
     HttpServer::new(move || {
         App::new()
             .app_data(handlebars_ref.clone())
             .app_data(config_ref.clone())
             .service(get_handler)
     })
-    .bind(("127.0.0.1", 8080))?
+    .bind(("0.0.0.0", port))?
     .run()
     .await
 }
