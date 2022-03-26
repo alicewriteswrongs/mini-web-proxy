@@ -5,7 +5,9 @@ It's quite unsophisticated! So I wouldn't rely on it for much.
 
 ## configuration
 
-You can set `base_url` to set the url which you wish to proxy access to, either
-via an environment variable or via a `Config.toml`.
+You can set a `$BASE_URL` environment variable to the url which you wish to
+proxy access to, like so (for development):
 
-Then `cargo run` should get you going in local development.
+```sh
+BASE_URL="https://example.com cargo run
+```
